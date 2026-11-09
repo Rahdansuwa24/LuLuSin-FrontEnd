@@ -549,11 +549,18 @@ export default function SiswaTryoutPengerjaan() {
               <h3 className="text-lg font-semibold mb-2">
                 Soal {currentQuestion} dari {totalQuestions}
               </h3>
-              {currentQuestionData?.question_image && (
+              {Boolean(currentQuestionData?.question_image || currentQuestionData?.image_question) && (
                 <img 
-                  src={currentQuestionData.question_image} 
-                  alt="Soal" 
-                  className="mb-4 rounded-lg max-w-full"
+                  src={
+                    (() => {
+                      const img = currentQuestionData.question_image || currentQuestionData.image_question;
+                      return (img.startsWith('http://') || img.startsWith('https://'))
+                        ? img
+                        : `${axiosInstance.defaults.baseURL || ''}/images/questionImage/${img}`;
+                    })()
+                  } 
+                  alt="Ilustrasi Soal" 
+                  className="mb-4 rounded-lg max-w-full max-h-96 object-contain"
                 />
               )}
               <p className="text-gray-700 whitespace-pre-wrap">

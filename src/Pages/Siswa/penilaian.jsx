@@ -1,30 +1,21 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import axios from "axios";
+import axiosInstance from "../../api/axiosInstance";
 
 const Penilaian = () => {
-  const [timeLeft, setTimeLeft] = useState(10); // Detik jeda
+  const [timeLeft, setTimeLeft] = useState(10);
   const [error, setError] = useState(null);
   const [isPosting, setIsPosting] = useState(true);
   const navigate = useNavigate();
   const { tryoutId } = useParams();
 
   useEffect(() => {
-    // POST ke endpoint finalize saat halaman dibuka
     const postFinalize = async () => {
       try {
         setIsPosting(true);
         setError(null);
-        await axios.post(
-          `http://localhost:3000/API/student/tryout/${tryoutId}/finalize`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-            },
-          }
-        );
+        await axiosInstance.post(`/API/student/tryout/${tryoutId}/finalize`);
       } catch (err) {
         setError(
           err.response?.data?.message ||
@@ -73,10 +64,10 @@ const Penilaian = () => {
         }}
       >
         <h1 style={{ fontSize: "1.5rem", fontWeight: "bold", marginBottom: 24 }}>
-          Jawaban anda sedang di proses
+          Jawaban anda sedang diproses
         </h1>
         {error ? (
-          <div style={{ color: "red", marginBottom: 16 }}>{error}</div>
+          <div style={{ color: "#f87171", marginBottom: 16 }}>{error}</div>
         ) : (
           <div
             style={{
@@ -86,9 +77,9 @@ const Penilaian = () => {
             }}
           >
             {isPosting
-              ? "Memproses..."
+              ? "Menghitung skor..."
               : timeLeft > 0
-              ? `...${timeLeft}`
+              ? `Mengalihkan dalam ${timeLeft} detik...`
               : ""}
           </div>
         )}
@@ -97,4 +88,4 @@ const Penilaian = () => {
   );
 };
 
-export default Penilaian; 
+export default Penilaian;
