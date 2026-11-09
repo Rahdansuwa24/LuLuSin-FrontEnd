@@ -47,6 +47,7 @@ const GuruTryout = () => {
         const mappedTryouts = tryoutData.map(tryout => ({
           id: tryout.tryout_id,
           tryout_name: tryout.tryout_name,
+          exam_mode: tryout.exam_mode || 'demo',
           status: tryout.status || 'Hide',
           // Total soal yang sudah dibuat
           soalDibuat: tryout.total_questions || 0,
@@ -194,6 +195,7 @@ const GuruTryout = () => {
               <tr className="bg-[#2f4a64] text-white">
                 <th className="py-3 px-4 text-left w-16">No</th>
                 <th className="py-3 px-4 text-left">Nama Tryout</th>
+                <th className="py-3 px-4 text-left">Mode Ujian</th>
                 <th className="py-3 px-4 text-left">Soal Dibuat</th>
                 <th className="py-3 px-4 text-left">Target soal</th>
                 <th className="py-3 px-4 text-left">Status</th>
@@ -209,6 +211,17 @@ const GuruTryout = () => {
                 >
                   <td className="py-4 px-4 text-[#2f4a64] font-medium">{index + 1}</td>
                   <td className="py-4 px-4 text-[#2f4a64] font-medium">{tryout.tryout_name}</td>
+                  <td className="py-4 px-4">
+                    {tryout.exam_mode === 'standard' ? (
+                      <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+                        Standar UTBK (195m)
+                      </span>
+                    ) : (
+                      <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                        Demo (Cepat)
+                      </span>
+                    )}
+                  </td>
                   <td className="py-4 px-4">
                     <div className="flex items-center gap-2">
                       <div className="w-24 h-6 bg-gray-200 rounded-full overflow-hidden">

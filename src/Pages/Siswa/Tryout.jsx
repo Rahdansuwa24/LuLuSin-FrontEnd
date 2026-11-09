@@ -4,7 +4,7 @@ import { motion } from "framer-motion"
 import { useState, useEffect } from "react"
 import { ArrowLeft, BookOpen, CheckCircle, Clock } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-import axios from "axios"
+import axiosInstance from "../../api/axiosInstance"
 
 export default function SiswaTryout() {
   const [activeTab, setActiveTab] = useState("pending")
@@ -28,7 +28,7 @@ export default function SiswaTryout() {
           }
         };
         
-        const response = await axios.get('http://localhost:3000/API/student/tryout', config);
+        const response = await axiosInstance.get('/API/student/tryout');
         console.log('Response API:', response.data);
 
         if (response.data) {

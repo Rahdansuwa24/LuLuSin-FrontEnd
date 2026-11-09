@@ -1,11 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion } from "framer-motion"
 import { useNavigate, useParams } from "react-router-dom"
 import axiosInstance from "../../api/axiosInstance"
-// Import icons if you're using lucide-react
-// If not, you can replace with any icon library or SVG elements
 
 export default function TryoutId() {
   const [isLoaded, setIsLoaded] = useState(false)
@@ -18,20 +16,6 @@ export default function TryoutId() {
     const fetchTryoutData = async () => {
       try {
         const response = await axiosInstance.get(`/API/student/tryout/${id}`)
-        console.log('API Response:', response.data)
-        console.log('Response structure:', {
-          tryout: {
-            name: response.data?.getTryout?.tryout_name,
-            episode: response.data?.getTryout?.episode,
-            id: response.data?.getTryout?.tryout_id
-          },
-          data: {
-            total_minimal_questions: response.data?.data?.total_minimal_questions,
-            total_time_limit: response.data?.data?.total_time_limit
-          }
-        })
-        
-        // Store the entire response data
         setTryoutData(response.data)
         setIsLoaded(true)
       } catch (err) {
@@ -51,9 +35,6 @@ export default function TryoutId() {
     fetchTryoutData()
   }, [id, navigate])
 
-  console.log('Current tryoutData:', tryoutData) // Debug log
-
-  // Arrow left icon component
   const ArrowLeft = () => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -71,7 +52,6 @@ export default function TryoutId() {
     </svg>
   )
 
-  // File text icon component
   const FileText = () => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -84,15 +64,14 @@ export default function TryoutId() {
       strokeLinecap="round"
       strokeLinejoin="round"
     >
-      <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-      <polyline points="14 2 14 8 20 8" />
-      <line x1="16" x2="8" y1="13" y2="13" />
-      <line x1="16" x2="8" y1="17" y2="17" />
-      <line x1="10" x2="8" y1="9" y2="9" />
+      <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+      <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+      <path d="M10 9H8" />
+      <path d="M16 13H8" />
+      <path d="M16 17H8" />
     </svg>
   )
 
-  // Clock icon component
   const Clock = () => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -115,8 +94,8 @@ export default function TryoutId() {
     visible: {
       opacity: 1,
       transition: {
-        duration: 0.5,
-        staggerChildren: 0.1
+        staggerChildren: 0.1,
+        delayChildren: 0.2
       }
     }
   }
@@ -166,7 +145,7 @@ export default function TryoutId() {
           <p>Error: {error}</p>
           <button 
             onClick={() => navigate('/siswa/tryout')}
-            className="mt-4 bg-[#1E3A5F] text-white px-4 py-2 rounded"
+            className="mt-4 bg-[#1E3A5F] text-white px-4 py-2 rounded cursor-pointer"
           >
             Kembali ke Daftar Tryout
           </button>
@@ -181,10 +160,10 @@ export default function TryoutId() {
               whileHover="hover"
               whileTap="tap"
               onClick={() => navigate('/siswa/tryout')}
-              className="bg-[#1E3A5F] text-white p-3 rounded-full hover:bg-[#2E4A7F] transition-colors duration-300 flex items-center gap-2 shadow-lg"
+              className="bg-[#1E3A5F] text-white p-3 rounded-full hover:bg-[#2E4A7F] transition-colors duration-300 flex items-center gap-2 shadow-lg cursor-pointer min-h-[44px] min-w-[44px] justify-center"
             >
               <ArrowLeft />
-              <span className="hidden md:inline">Kembali</span>
+              <span className="hidden md:inline pr-2">Kembali</span>
             </motion.button>
           </motion.div>
 
@@ -192,11 +171,24 @@ export default function TryoutId() {
             <motion.div
               variants={cardVariants}
               whileHover="hover"
-              className="bg-[#1E3A5F] text-white p-6 rounded-xl shadow-lg transform transition-all duration-300 hover:shadow-xl"
+              className="bg-[#1E3A5F] text-white p-6 rounded-xl shadow-lg transform transition-all duration-300 hover:shadow-xl flex flex-col justify-between"
             >
-              <h2 className="text-2xl font-bold">
-                {tryoutData?.getTryout?.tryout_name || 'Tryout UTBK SNBT 2025'}
-              </h2>
+              <div>
+                <h2 className="text-2xl font-bold">
+                  {tryoutData?.getTryout?.tryout_name || 'Tryout UTBK SNBT'}
+                </h2>
+                <div className="mt-3">
+                  {tryoutData?.getTryout?.exam_mode === 'standard' ? (
+                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-200 border border-blue-400/30 inline-block">
+                      Standar UTBK Resmi (195 Menit)
+                    </span>
+                  ) : (
+                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-200 border border-amber-400/30 inline-block">
+                      Mode Demo (Simulasi Cepat)
+                    </span>
+                  )}
+                </div>
+              </div>
             </motion.div>
 
             <motion.div
@@ -243,7 +235,7 @@ export default function TryoutId() {
                   <h3 className="text-xl font-semibold mb-4 text-[#d9c5a0]">
                     Persiapan Sebelum Tryout
                   </h3>
-                  <ol className="list-decimal list-inside space-y-3 text-gray-200">
+                  <ol className="list-decimal list-inside space-y-3 text-gray-200 text-sm">
                     <li className="leading-relaxed">
                       Pastikan menggunakan laptop/HP dalam kondisi baik dan memiliki koneksi internet yang stabil
                     </li>
@@ -268,12 +260,12 @@ export default function TryoutId() {
                   <h3 className="text-xl font-semibold mb-4 text-[#d9c5a0]">
                     Saat Tryout Berlangsung
                   </h3>
-                  <ol className="list-decimal list-inside space-y-3 text-gray-200">
+                  <ol className="list-decimal list-inside space-y-3 text-gray-200 text-sm">
                     <li className="leading-relaxed">
                       Tryout memiliki batas waktu, dan waktu akan berjalan otomatis sejak dimulai
                     </li>
                     <li className="leading-relaxed">
-                      Dilarang membuka tab atau aplikasi lain yang tidak berhubungan dengan tryout
+                      Dilarang membuka tab atau aplikasi lain. Meninggalkan halaman 3 kali akan mendiskualifikasi ujian dengan nilai 0
                     </li>
                     <li className="leading-relaxed">
                       Kerjakan soal dengan jujur tanpa bantuan pihak lain
@@ -295,7 +287,6 @@ export default function TryoutId() {
             whileHover="hover"
             whileTap="tap"
             onClick={() => {
-              // Ambil array subjects dari tryoutData, urutkan, dan arahkan ke subjek pertama
               let subjects = tryoutData?.getTryout?.subjects;
               if (typeof subjects === 'string') {
                 subjects = JSON.parse(subjects);
@@ -308,7 +299,7 @@ export default function TryoutId() {
                 alert('Data subjek tidak ditemukan!');
               }
             }}
-            className="w-full bg-gradient-to-r from-[#1E3A5F] to-[#2E4A7F] text-white py-4 px-8 rounded-xl text-lg font-semibold shadow-lg transform transition-all duration-300 hover:shadow-xl"
+            className="w-full bg-gradient-to-r from-[#1E3A5F] to-[#2E4A7F] text-white py-4 px-8 rounded-xl text-lg font-semibold shadow-lg transform transition-all duration-300 hover:shadow-xl cursor-pointer min-h-[44px]"
           >
             MULAI TRYOUT
           </motion.button>
@@ -317,4 +308,3 @@ export default function TryoutId() {
     </motion.div>
   )
 }
-
