@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
-import { PlusCircle, X, Upload, ChevronDown, ChevronUp, Trash2, Edit } from "lucide-react"
+import { PlusCircle, X, Upload, ChevronDown, ChevronUp, Trash2, Edit, FileSpreadsheet, Download } from "lucide-react"
 import { useParams, useNavigate, useLocation } from "react-router-dom"
 import axiosInstance from "../../api/axiosInstance"
 import { FiArrowLeft, FiArrowRight } from "react-icons/fi"
@@ -28,6 +28,11 @@ function GuruTryoutSubjek() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [questionToDelete, setQuestionToDelete] = useState(null)
   const [notification, setNotification] = useState({ show: false, message: '', type: 'success' })
+  const [showImportModal, setShowImportModal] = useState(false)
+  const [importFile, setImportFile] = useState(null)
+  const [importing, setImporting] = useState(false)
+  const [importError, setImportError] = useState(null)
+  const [importSuccess, setImportSuccess] = useState(null)
 
     const fetchSubjectData = async () => {
       try {
@@ -339,6 +344,67 @@ function GuruTryoutSubjek() {
           type: 'error'
         });
       });
+  };
+
+  
+  const downloadExcelTemplate = () => {
+    const subName = subjectData?.subject?.[0]?.subject_name || "Subtes";
+    const csvContent = 
+      "\uFEFF" +
+      "Pertanyaan,Opsi A,Opsi B,Opsi C,Opsi D,Opsi E,Kunci Jawaban,Pembahasan,Skor\n" +
+      '"Di era digital saat ini kemampuan literasi kritis sangat penting untuk menyaring informasi. Apa tujuan utama literasi kritis?","Membaca semua berita yang lewat","Menyaring dan memvalidasi informasi sebelum mempercayainya","Menghindari penggunaan internet","Menyebarkan informasi secara cepat","Mengabaikan semua berita di media",B,"Literasi kritis berfungsi untuk menganalisis dan memvalidasi kebenaran informasi agar tidak terprovokasi hoaks.",100\n' +
+      '"Ani memiliki tinggi badan lebih daripada Budi. Budi lebih tinggi daripada Citra. Siapakah yang paling tinggi di antara ketiganya?","Ani","Budi","Citra","Ani dan Citra","Tidak dapat ditentukan",A,"Urutan tinggi badan adalah Ani > Budi > Citra, maka yang paling tinggi adalah Ani.",100\n';
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `Template_Soal_UTBK_${subName.replace(/\s+/g, '_')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleImportExcel = async (e) => {
+    if (e) e.preventDefault();
+    if (!importFile) {
+      setImportError("Silakan pilih file Excel (.xlsx / .xls / .csv) terlebih dahulu.");
+      return;
+    }
+
+    setImporting(true);
+    setImportError(null);
+    setImportSuccess(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", importFile);
+
+      const response = await axiosInstance.post(
+        `/API/teacher/tryout/${tryout_id}/${subject_id}/import_excel`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data"
+          }
+        }
+      );
+
+      if (response.data) {
+        setImportSuccess(response.data.message || "Soal berhasil diimpor!");
+        setImportFile(null);
+        setTimeout(() => {
+          setShowImportModal(false);
+          setImportSuccess(null);
+          fetchSubjectData();
+        }, 1200);
+      }
+    } catch (err) {
+      console.error("Import error:", err);
+      setImportError(err.response?.data?.message || "Gagal mengimpor file. Pastikan format kolom sesuai panduan template.");
+    } finally {
+      setImporting(false);
+    }
   };
 
   // Function untuk kembali ke halaman tryout dan kemudian masuk kembali
@@ -667,6 +733,130 @@ function GuruTryoutSubjek() {
             </div>
           )}
         </div>
+      
+        {/* Modal Import Excel */}
+        {showImportModal && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-white rounded-2xl p-6 w-full max-w-lg shadow-2xl border border-gray-100"
+            >
+              <div className="flex justify-between items-center pb-3 border-b border-gray-100">
+                <div className="flex items-center gap-2.5">
+                  <div className="p-2 bg-emerald-100 text-emerald-700 rounded-lg">
+                    <FileSpreadsheet className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">Import Soal dari Excel</h3>
+                    <p className="text-xs text-gray-500">Mendukung format .xlsx, .xls, dan .csv</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowImportModal(false)}
+                  className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="my-5 space-y-4">
+                {/* Format Guidance Card */}
+                <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700">
+                  <p className="font-semibold text-slate-900 mb-1">Format Kolom Spreadsheet:</p>
+                  <p className="text-slate-600 mb-2">
+                    Pastikan file Excel memiliki baris header dengan susunan kolom:
+                  </p>
+                  <div className="bg-white p-2 rounded border border-slate-200 font-mono text-[11px] text-slate-800 overflow-x-auto whitespace-nowrap">
+                    Pertanyaan | Opsi A | Opsi B | Opsi C | Opsi D | Opsi E | Kunci Jawaban | Pembahasan | Skor
+                  </div>
+                  <div className="mt-2.5 flex items-center justify-between">
+                    <span className="text-slate-500">*Kunci jawaban diisi huruf: A, B, C, D, atau E</span>
+                    <button
+                      type="button"
+                      onClick={downloadExcelTemplate}
+                      className="text-blue-600 hover:text-blue-800 font-semibold underline inline-flex items-center gap-1"
+                    >
+                      <Download className="w-3.5 h-3.5" /> Download Template
+                    </button>
+                  </div>
+                </div>
+
+                {/* File Upload Zone */}
+                <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-emerald-500 transition-colors bg-gray-50/50">
+                  <input
+                    type="file"
+                    id="excel-file-input"
+                    accept=".xlsx, .xls, .csv"
+                    className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        setImportFile(e.target.files[0]);
+                        setImportError(null);
+                      }
+                    }}
+                  />
+                  <label
+                    htmlFor="excel-file-input"
+                    className="cursor-pointer flex flex-col items-center justify-center"
+                  >
+                    <Upload className="w-10 h-10 text-emerald-600 mb-2" />
+                    <span className="text-sm font-semibold text-gray-700">
+                      {importFile ? importFile.name : "Pilih atau Seret File Excel ke Sini"}
+                    </span>
+                    <span className="text-xs text-gray-400 mt-1">
+                      {importFile 
+                        ? `Ukuran: ${(importFile.size / 1024).toFixed(1)} KB`
+                        : "Klik untuk memilih file (.xlsx, .xls, .csv)"}
+                    </span>
+                  </label>
+                </div>
+
+                {/* Feedback */}
+                {importError && (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-xs text-red-700">
+                    {importError}
+                  </div>
+                )}
+                {importSuccess && (
+                  <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-800 font-semibold">
+                    {importSuccess}
+                  </div>
+                )}
+              </div>
+
+              <div className="flex justify-end gap-2.5 pt-3 border-t border-gray-100">
+                <button
+                  type="button"
+                  onClick={() => setShowImportModal(false)}
+                  className="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                  disabled={importing}
+                >
+                  Batal
+                </button>
+                <button
+                  type="button"
+                  onClick={handleImportExcel}
+                  disabled={!importFile || importing}
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors flex items-center gap-2"
+                >
+                  {importing ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Mengimpor...</span>
+                    </>
+                  ) : (
+                    <>
+                      <FileSpreadsheet className="w-4 h-4" />
+                      <span>Mulai Import Soal</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+
       </main>
     </div>
   )

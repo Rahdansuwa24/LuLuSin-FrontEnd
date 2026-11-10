@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
+import { FiArrowLeft, FiHelpCircle, FiBookOpen } from "react-icons/fi"
 import axiosInstance from "../../api/axiosInstance" // Pastikan path ini benar
 
 const GuruTryoutDetail = () => {
@@ -161,6 +162,16 @@ const GuruTryoutDetail = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
       >
+        {/* Tombol Kembali */}
+        <div className="mb-4">
+          <button
+            onClick={() => navigate('/guru/tryout')}
+            className="flex items-center gap-2 text-sm font-semibold text-[#2f4a64] hover:text-[#1e364d] bg-white px-3.5 py-2 rounded-lg shadow-xs border border-gray-200 transition-colors"
+          >
+            <FiArrowLeft size={16} /> Kembali ke Data Tryout
+          </button>
+        </div>
+
         {/* Judul Tryout */}
         <motion.h1
           className="text-3xl font-bold text-gray-800 mb-8 text-center"
@@ -184,6 +195,19 @@ const GuruTryoutDetail = () => {
             Status: {tryoutData.status === 'Show' ? 'Dipublikasikan' : 'Disembunyikan'}
           </div>
         </motion.div>
+
+        {/* Banner Panduan Subtes */}
+        <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200/80 rounded-xl flex items-start gap-3.5 shadow-sm">
+          <div className="p-2 bg-blue-600 text-white rounded-lg mt-0.5 shadow-xs">
+            <FiHelpCircle size={18} />
+          </div>
+          <div className="text-sm text-[#2f4a64]">
+            <h4 className="font-semibold text-base text-gray-800 mb-0.5">Pilih Subtes untuk Mengisi Soal</h4>
+            <p className="text-gray-600 leading-relaxed">
+              Setiap tryout UTBK terbagi ke dalam subtes di bawah ini. Klik tombol <strong className="text-[#2f4a64]">"Kelola Soal"</strong> pada subtes yang diinginkan untuk menambahkan soal satu per satu atau <strong>mengimpor sekaligus banyak soal dari file Excel</strong>.
+            </p>
+          </div>
+        </div>
 
         {/* Container untuk semua kategori */}
         <div className="w-full space-y-6">
@@ -238,7 +262,7 @@ const GuruTryoutDetail = () => {
                   ))}
                   {(!category.items || category.items.length === 0) && (
                     <tr>
-                      <td colSpan="2" className="px-6 py-4 text-center text-gray-500">
+                      <td colSpan="3" className="px-6 py-4 text-center text-gray-500">
                         Tidak ada data untuk kategori ini
                       </td>
                     </tr>

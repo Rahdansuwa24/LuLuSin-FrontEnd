@@ -1,7 +1,7 @@
 "use client"
 import { useState, useEffect } from "react"
 import { useNavigate, useLocation } from "react-router-dom"
-import { FiEdit, FiPlus, FiTrash2, FiX } from "react-icons/fi"
+import { FiEdit, FiPlus, FiTrash2, FiX, FiBookOpen, FiHelpCircle } from "react-icons/fi"
 import axiosInstance from "../../api/axiosInstance"
 
 const GuruTryout = () => {
@@ -199,7 +199,7 @@ const GuruTryout = () => {
                 <th className="py-3 px-4 text-left">Soal Dibuat</th>
                 <th className="py-3 px-4 text-left">Target soal</th>
                 <th className="py-3 px-4 text-left">Status</th>
-                <th className="py-3 px-4 text-left w-24">Aksi</th>
+                <th className="py-3 px-4 text-center w-52">Kelola & Aksi</th>
               </tr>
             </thead>
             <tbody>
