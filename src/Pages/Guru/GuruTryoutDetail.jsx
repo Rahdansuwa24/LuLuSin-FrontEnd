@@ -190,26 +190,43 @@ const GuruTryoutDetail = () => {
           {tryoutData.tryout_name}
         </motion.h1>
 
-        {/* Status Tryout */}
+        {/* Status & Quick Action Header */}
         <motion.div
-          className="flex justify-center mb-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-xl shadow-xs border border-gray-200/80 mb-6"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          {(() => {
-            const isPublished = String(tryoutData.status || "").trim().toLowerCase() === 'show';
-            return (
-              <div className={`text-sm font-semibold px-4 py-1.5 rounded-full border flex items-center gap-2 ${
-                isPublished 
-                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                  : 'bg-amber-50 text-amber-700 border-amber-200'
-              }`}>
-                <span className={`w-2.5 h-2.5 rounded-full ${isPublished ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
-                Status: {isPublished ? 'Dipublikasikan (Bisa Dikerjakan Siswa)' : 'Disembunyikan (Draft)'}
-              </div>
-            );
-          })()}
+          <div className="flex items-center gap-2.5">
+            <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Status Tryout:</span>
+            {(() => {
+              const isPublished = String(tryoutData.status || "").trim().toLowerCase() === 'show';
+              return (
+                <span className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-full border ${
+                  isPublished 
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                    : 'bg-amber-50 text-amber-700 border-amber-200'
+                }`}>
+                  <span className={`w-2 h-2 rounded-full ${isPublished ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                  {isPublished ? 'Dipublikasikan (Bisa Dikerjakan Siswa)' : 'Disembunyikan (Draft)'}
+                </span>
+              );
+            })()}
+          </div>
+
+          <button
+            type="button"
+            onClick={handlePublish}
+            className={`px-4 py-2 text-xs font-bold rounded-lg transition-all shadow-xs flex items-center gap-2 ${
+              String(tryoutData.status || "").trim().toLowerCase() === 'show'
+                ? 'bg-amber-500 hover:bg-amber-600 text-white'
+                : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+            }`}
+          >
+            {String(tryoutData.status || "").trim().toLowerCase() === 'show'
+              ? 'Ubah ke Sembunyikan (Draft)'
+              : 'Publikasikan Tryout Ini'}
+          </button>
         </motion.div>
 
         {/* Banner Panduan Subtes */}
