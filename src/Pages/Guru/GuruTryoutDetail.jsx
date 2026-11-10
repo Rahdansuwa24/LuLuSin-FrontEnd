@@ -30,16 +30,33 @@ const GuruTryoutDetail = () => {
 
         // Get the data from response
         let apiData = response.data.result || response.data;
-        
         if (!apiData) {
           throw new Error("Format data dari server tidak sesuai yang diharapkan")
         }
 
-        // Create the formatted data structure
+        if (typeof apiData === 'string') {
+          try {
+            apiData = JSON.parse(apiData);
+          } catch (e) {
+            console.error("Gagal parse apiData JSON:", e);
+          }
+        }
+
+        let categories = apiData.subject_categories || [];
+        if (typeof categories === 'string') {
+          try {
+            categories = JSON.parse(categories);
+          } catch (e) {
+            categories = [];
+          }
+        }
+
+        const normalizedStatus = String(apiData.status || "").trim().toLowerCase();
+
         const formattedData = {
           tryout_name: apiData.tryout_name || "Nama Tryout Tidak Ditemukan",
-          status: apiData.status || "Hide",
-          subject_categories: apiData.subject_categories || []
+          status: normalizedStatus === 'show' ? 'show' : 'hide',
+          subject_categories: Array.isArray(categories) ? categories : []
         };
 
         // Log status yang diterima untuk debugging
@@ -88,21 +105,12 @@ const GuruTryoutDetail = () => {
     
     // Tentukan status baru berdasarkan status saat ini
     // Pastikan memeriksa status dengan case insensitive dan whitespace handling
-    const currentStatus = String(tryoutData.status || "").trim();
-    let newStatus;
-    
-    if (currentStatus.toLowerCase() === 'show') {
-      newStatus = 'Hide';
-      console.log('Status saat ini "Show", akan diubah menjadi "Hide"');
-    } else {
-      newStatus = 'Show';
-      console.log('Status saat ini bukan "Show", akan diubah menjadi "Show"');
-    }
+    const currentStatus = String(tryoutData.status || "").trim().toLowerCase();
+    const newStatus = currentStatus === 'show' ? 'hide' : 'show';
     
     console.log(`Status saat ini: ${currentStatus}, akan diubah menjadi: ${newStatus}`);
     
     try {
-      // Kirim permintaan ke API untuk mengubah status
       console.log(`Mengirim permintaan ke API /API/teacher/tryout/${id}/update_status dengan body:`, { status: newStatus });
       
       const response = await axiosInstance.patch(`/API/teacher/tryout/${id}/update_status`, {
@@ -189,11 +197,19 @@ const GuruTryoutDetail = () => {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.5, delay: 0.3 }}
         >
-          <div className={`text-sm font-medium px-3 py-1 rounded-full ${
-            tryoutData.status === 'Show' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-          }`}>
-            Status: {tryoutData.status === 'Show' ? 'Dipublikasikan' : 'Disembunyikan'}
-          </div>
+          {(() => {
+            const isPublished = String(tryoutData.status || "").trim().toLowerCase() === 'show';
+            return (
+              <div className={`text-sm font-semibold px-4 py-1.5 rounded-full border flex items-center gap-2 ${
+                isPublished 
+                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+                  : 'bg-amber-50 text-amber-700 border-amber-200'
+              }`}>
+                <span className={`w-2.5 h-2.5 rounded-full ${isPublished ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
+                Status: {isPublished ? 'Dipublikasikan (Bisa Dikerjakan Siswa)' : 'Disembunyikan (Draft)'}
+              </div>
+            );
+          })()}
         </motion.div>
 
         {/* Banner Panduan Subtes */}
@@ -282,24 +298,26 @@ const GuruTryoutDetail = () => {
         {/* Tombol Publish/Unpublish */}
         <div className="flex justify-end mt-8">
           {console.log("Status saat render tombol:", tryoutData.status)}
-          <motion.button
-            onClick={handlePublish}
-            className={`${
-              String(tryoutData.status || "").trim().toLowerCase() === 'show' 
-                ? 'bg-red-600 hover:bg-red-700' 
-                : 'bg-green-600 hover:bg-green-700'
-            } text-white font-semibold py-2 px-6 rounded-lg shadow transition-colors duration-200`}
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.98 }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.5 }}
-          >
-            {/* Tampilkan teks tombol berdasarkan status saat ini dengan penanganan yang lebih robust */}
-            {String(tryoutData.status || "").trim().toLowerCase() === 'show' 
-              ? 'Sembunyikan Tryout' 
-              : 'Publikasikan Tryout'}
-          </motion.button>
+          {(() => {
+            const isPublished = String(tryoutData.status || "").trim().toLowerCase() === 'show';
+            return (
+              <motion.button
+                onClick={handlePublish}
+                className={`${
+                  isPublished 
+                    ? 'bg-amber-600 hover:bg-amber-700' 
+                    : 'bg-emerald-600 hover:bg-emerald-700'
+                } text-white font-semibold py-2.5 px-6 rounded-lg shadow-sm transition-colors duration-200 flex items-center gap-2`}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.5 }}
+              >
+                {isPublished ? 'Sembunyikan Tryout (Draft)' : 'Publikasikan Tryout'}
+              </motion.button>
+            );
+          })()}
         </div>
       </motion.div>
     </div>
