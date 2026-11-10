@@ -259,37 +259,38 @@ const GuruTryoutDetail = () => {
               <table className="w-full text-sm text-left text-gray-700">
                 <thead className="text-xs text-gray-600 uppercase bg-gray-100">
                   <tr>
-                    <th scope="col" className="px-6 py-3">Nama Subjek</th>
-                    <th scope="col" className="px-6 py-3 text-center">Soal Dibuat</th>
+                    <th scope="col" className="px-6 py-3 font-semibold">Nama Subtes / Subjek</th>
+                    <th scope="col" className="px-6 py-3 text-center w-36 font-semibold">Soal Dibuat</th>
+                    <th scope="col" className="px-6 py-3 text-right w-56 font-semibold">Aksi & Import</th>
                   </tr>
                 </thead>
                 <tbody>
                   {category.items && category.items.map((item, itemIndex) => (
                     <tr 
                       key={itemIndex} 
-                      className="border-b hover:bg-gray-50 cursor-pointer"
+                      className="border-b hover:bg-blue-50/50 cursor-pointer transition-colors"
                       onClick={() => {
-                        if (!item.id_subject) {
-                          return;
-                        }
-
-                        if (!id) {
-                          return;
-                        }
-
-                        try {
-                          const path = `/guru/tryout/${id}/${item.id_subject}`;
-                          window.location.href = path;
-                        } catch (error) {
-                          console.error("Navigation error:", error);
+                        if (item.id_subject && id) {
+                          navigate(`/guru/tryout/${id}/${item.id_subject}`);
                         }
                       }}
                     >
-                      <td className="px-6 py-4 font-medium text-gray-900">
+                      <td className="px-6 py-4 font-semibold text-gray-900">
                         {item.subject_name || "Untitled Subject"}
                       </td>
                       <td className="px-6 py-4 text-center">
-                        {item.soal_dibuat || '0'}
+                        <span className="inline-block px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-800 border border-blue-200">
+                          {item.soal_dibuat || '0'} Soal
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
+                        <button
+                          onClick={() => navigate(`/guru/tryout/${id}/${item.id_subject}`)}
+                          className="px-3.5 py-1.5 bg-[#2e4460] hover:bg-[#1e364d] text-white text-xs font-bold rounded-lg transition-all shadow-xs inline-flex items-center gap-1.5"
+                          title="Buka subtes untuk membuat soal manual atau import sekaligus dari Excel"
+                        >
+                          <FiBookOpen size={14} /> Kelola & Import Soal →
+                        </button>
                       </td>
                     </tr>
                   ))}
